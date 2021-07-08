@@ -4,5 +4,6 @@ export const Theme1 = {
     secoundary: '#FA7A01',
     danger: '#d50000',
     grayText: '#C0B7CC',
-    yellow: "#FFFF3A"
+    yellow: "#FFFF3A",
+    blue: "#0E44BB"
 }
