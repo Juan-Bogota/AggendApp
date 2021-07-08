@@ -14,14 +14,18 @@ import { Profile } from "./Profile";
 import { Menu } from "../components/Menu";
 import { PageWrapperMenu } from "../globalStyles";
 import { useSelector, useDispatch } from 'react-redux';
-import { autologin } from '../store'
+import { autologin, redirectDone } from '../store'
 const Home = React.lazy(() => import('./Home'));
 const Schedule = React.lazy(() => import("./Schedule"));
 
-const AuthenticatedUser = ({children}) => {
+const AuthenticatedUser = ({ children }) => {
 
-  const {pathname } = useLocation();
+  const { pathname } = useLocation();
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(redirectDone())
+  }, [pathname])
   return (
     <Fragment>
       <PageWrapperMenu>
@@ -32,7 +36,7 @@ const AuthenticatedUser = ({children}) => {
   )
 }
 
-const NotAuthenticatedUser = ({children}) => {
+const NotAuthenticatedUser = ({ children }) => {
   return children;
 }
 
@@ -45,7 +49,7 @@ export const NavigationApp = () => {
     setTimeout(() => {
       dispatch(autologin());
     }, 500);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (userData.splash) {
@@ -94,7 +98,7 @@ export const NavigationApp = () => {
           </AuthenticatedUser>
         )
       }
-        
+
     </Router>
   );
 };

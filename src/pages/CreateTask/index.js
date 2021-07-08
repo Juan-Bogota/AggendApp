@@ -11,16 +11,17 @@ import { HTTP_VERBS, requestHttp } from "../../utils/HttpRequest";
 import { useSelector, useDispatch } from 'react-redux';
 import moment from "moment";
 import { apiCreateTask } from "../../store";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 
 
 export const CreateTask = ({ title }) => {
-  
+
   const [usersList, setUsersList] = useState([]);
   const [usersFiltered, setUsersFiltered] = useState([]);
 
   const dispatch = useDispatch();
   const createTaskData = useSelector(state => state.createTask);
+  const redirectData = useSelector(state => state.redirect);
 
   let history = useHistory();
 
@@ -38,17 +39,17 @@ export const CreateTask = ({ title }) => {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const {data:users} = await requestHttp({ 
+        const { data: users } = await requestHttp({
           method: HTTP_VERBS.GET,
           endpoint: 'users',
         });
-      setUsersList(
-        users.map(el => ({value: el._id, label: el.name})) 
-      );
+        setUsersList(
+          users.map(el => ({ value: el._id, label: el.name }))
+        );
       } catch (error) {
-        setUsersList({value:null, label: `Error ${error.response.statusText}`});
+        setUsersList({ value: null, label: `Error ${error.response.statusText}` });
       }
-    } 
+    }
     getUsers();
   }, [])
 
@@ -61,23 +62,26 @@ export const CreateTask = ({ title }) => {
   }, [createTaskData]);
 
   useEffect(() => {
-    if(!watch("responsible")) return; 
+    if (!watch("responsible")) return;
     const userSelected = watch("responsible");
     const userFilterList = usersList.filter(el => el.label !== userSelected.label);
     setUsersFiltered(userFilterList);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("responsible")])
 
   const onSubmitCreate = (data) => {
     const sendData = {
       ...data,
       responsible: data.responsible.value,
-      collaborators : data.collaborators.map(el => el.value),
+      collaborators: data.collaborators.map(el => el.value),
       dueDateTask: moment(data.dueDateTask).format()
     }
     dispatch(apiCreateTask(sendData, history));
-    
   };
+
+  if (redirectData.path !== '') {
+    return <Redirect to={{ pathname: redirectData.path }} />
+  }
 
   return (
     <Fragment>
@@ -85,16 +89,16 @@ export const CreateTask = ({ title }) => {
       <form onSubmit={handleSubmit(onSubmitCreate)}>
         <FormGroup>
           <label>Task title</label>
-          <Input 
-            register={register} 
-            name="title" 
+          <Input
+            register={register}
+            name="title"
             rules={{ required: true, minLength: 6 }}
-            label="Task title" 
-            type="text" 
-            placeholder="Enter task title" 
+            label="Task title"
+            type="text"
+            placeholder="Enter task title"
           />
-          { errors.taskTitle?.type === 'required' && <LabelError>Field required</LabelError> }
-          { errors.taskTitle?.type === 'minLength' && <LabelError>Min Length 6 characters</LabelError> }
+          {errors.taskTitle?.type === 'required' && <LabelError>Field required</LabelError>}
+          {errors.taskTitle?.type === 'minLength' && <LabelError>Min Length 6 characters</LabelError>}
         </FormGroup>
 
         <FormGroup>
@@ -111,7 +115,7 @@ export const CreateTask = ({ title }) => {
               />
             )}
           />
-          { errors.responsible && <LabelError>Field required</LabelError> }
+          {errors.responsible && <LabelError>Field required</LabelError>}
         </FormGroup>
 
         <FormGroup>
@@ -129,7 +133,7 @@ export const CreateTask = ({ title }) => {
               />
             )}
           />
-          { errors.collaborators && <LabelError>Field required</LabelError> }
+          {errors.collaborators && <LabelError>Field required</LabelError>}
         </FormGroup>
         <FormGroup>
           <label>Due Date</label>
@@ -144,23 +148,23 @@ export const CreateTask = ({ title }) => {
               )}
             />
           </div>
-          { errors.dueDateTask && <LabelError>Field required</LabelError> }
+          {errors.dueDateTask && <LabelError>Field required</LabelError>}
         </FormGroup>
 
         <FormGroup>
           <label>Description</label>
           <div>
-            <Textarea 
-              {...register("description", { required: true } )} 
+            <Textarea
+              {...register("description", { required: true })}
               rows="3"
-              errors={ errors.description }
+              errors={errors.description}
             />
           </div>
-          { errors.description && <LabelError>Field required</LabelError> }
+          {errors.description && <LabelError>Field required</LabelError>}
         </FormGroup>
         <div>
-          <Button disabled={!isValid || createTaskData.loading } type="submit" text={createTaskData.loading ? 'Loading...' : 'Create'} />
-          { createTaskData.error && <LabelError> {createTaskData.error}</LabelError> }
+          <Button disabled={!isValid || createTaskData.loading} type="submit" text={createTaskData.loading ? 'Loading...' : 'Create'} />
+          {createTaskData.error && <LabelError> {createTaskData.error}</LabelError>}
         </div>
       </form>
     </Fragment>
